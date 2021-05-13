@@ -80,6 +80,11 @@ float PhysVector::magnitudeSquared()
 	return pow(magnitude(), 2);
 }
 
+float PhysVector::getDistanceBetweenPoints(PhysVector a, PhysVector b)
+{
+	return sqrt(((b.x - a.x) * (b.x - a.x)) + ((b.y - a.y) * (b.y - a.y)));
+}
+
 void PhysVector::normalize()
 {
 	//PhysVector result = PhysVector(0, 0);

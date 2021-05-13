@@ -21,7 +21,7 @@ public:
 
 	bool isFinished = false;
 	//EDIT DAMPING VALUE HERE
-	float damping = 1.0f;
+	float damping;
 
 public:
 	void update(float time);

@@ -17,6 +17,7 @@ public:
 	float dotProduct(PhysVector a, PhysVector b);
 	float operator*=(const PhysVector v); //dot prod alt
 	float magnitudeSquared();
+	float getDistanceBetweenPoints(PhysVector a, PhysVector b);
 	
 	void normalize();
 
