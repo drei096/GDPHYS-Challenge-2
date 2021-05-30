@@ -17,7 +17,11 @@ void PhysParticle::update(float time)
 
 void PhysParticle::updatePos(float time)
 {
+	PhysVector deltaPos = (velocity * time) + ((acceleration * powf(time, 2)) * (1 / 2));
+
 	position = position + (velocity * time) + ((acceleration * powf(time, 2)) * (1 / 2));
+
+	totalDistanceTravelled = totalDistanceTravelled + PhysVector(abs(deltaPos.x), abs(deltaPos.y));
 }
 
 void PhysParticle::updateVelocity(float time)

@@ -18,6 +18,7 @@ public:
 	PhysVector totalVelocity = PhysVector(0, 0);
 	PhysVector initialPos = PhysVector(0, 0);
 	sf::CircleShape particleShape;
+	PhysVector totalDistanceTravelled = PhysVector(0,0);
 
 	bool isFinished = false;
 	//EDIT DAMPING VALUE HERE

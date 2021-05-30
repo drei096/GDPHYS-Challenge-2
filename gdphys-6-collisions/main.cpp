@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <vector>
 #include <ctime>
+#include <cmath>
+#include <iomanip>
 #include "P6 components/PhysVector.h"
 #include "P6 components/PhysParticle.h"
 #include "Utils.h"
@@ -38,6 +40,8 @@ int main()
     sf::Texture shurikenTexture;
     sf::Sprite shurikenSprite;
 
+    float lastDegMeasure, revCount = 0, totalAngle = 0;
+
     Utils::offset = PhysVector(0, 250);
 
     shurikenTexture.loadFromFile("Images/shuriken.png");
@@ -51,8 +55,11 @@ int main()
     bullet.mass = 50.0f;
     //PhysVector dir = PhysVector(-1, 0);
     //bullet.addForce(dir * 50);
-    bullet.velocity = PhysVector(0,0);
-    bullet.addForce(PhysVector(-20000, 0));
+    //bullet.velocity = PhysVector(0,0);
+
+    //NOTE: PUT A NEGATIVE FORCE CLOSE TO THE FORCE APPLIED IN BULLET2 SO THAT THE SHURIKEN WILL NOT MOVE
+    bullet.addForce(PhysVector(-19850, 0));
+
     bullet.damping = 1.0f;
 
     bullet.particleShape.setRadius(20.0f);
@@ -74,7 +81,7 @@ int main()
     shurikenSprite.setOrigin(shurikenTexture.getSize().x / 2, shurikenTexture.getSize().y / 2);
     PhysVector shurikenPos = Utils::p6ToSFMLPoint(bullet.position);
 
-    //BULLET 2
+    //BULLET 2 AKA THE TOP WEIGHT
     PhysParticle bullet2;
     bullet2.name = "Bullet 2";
     bullet2.mass = 0.1f;
@@ -97,8 +104,9 @@ int main()
 
     pWorld.addParticle(&bullet2);
 
+    float circumference = 2.0f * PI * 100;
     
-    //BULLET 3
+    //BULLET 3 AKA THE RIGHT WEIGHT
     PhysParticle bullet3;
     bullet3.name = "Bullet 3";
     bullet3.mass = 0.1f;
@@ -119,7 +127,7 @@ int main()
 
     pWorld.addParticle(&bullet3);
 
-    //BULLET 4
+    //BULLET 4 AKA THE BOT WEIGHT
     PhysParticle bullet4;
     bullet4.name = "Bullet 4";
     bullet4.mass = 0.1f;
@@ -140,8 +148,8 @@ int main()
 
     pWorld.addParticle(&bullet4);
 
-    
-    //BULLET 5
+     
+    //BULLET 5 AKA THE LEFT WEIGHT
     PhysParticle bullet5;
     bullet5.name = "Bullet 5";
     bullet5.mass = 0.1f;
@@ -162,6 +170,7 @@ int main()
 
     pWorld.addParticle(&bullet5);
     
+    //TEMP VECTOR FOR CALCULATIONS
     PhysVector temp(0, 0);
 
     //ADD RODS
@@ -208,8 +217,8 @@ int main()
     pWorld.links.push_back(bearToLeft);
 
     Rod* topToLeft = new Rod();
-    topToLeft->particles[0] = &bullet2; 
-    topToLeft->particles[1] = &bullet5;
+    topToLeft->particles[0] = &bullet2; //top bullet
+    topToLeft->particles[1] = &bullet5; //left bullet
     topToLeft->length = temp.getDistanceBetweenPoints(bullet2.position, bullet5.position);
     pWorld.links.push_back(topToLeft);
     
@@ -226,10 +235,11 @@ int main()
 
             timeSinceLast -= TimePerFrame;
 
+            PhysVector prevPos = bullet2.position - bullet.position;
 
             pWorld.update(TimePerFrame.asMilliseconds() / 1000.0f);
 
-
+            PhysVector currPos = bullet2.position - bullet.position;
 
             PhysVector renderPoint1 = bullet.toRenderPoint();
             bullet.particleShape.setPosition(renderPoint1.x, renderPoint1.y);
@@ -259,9 +269,12 @@ int main()
 
             float rad_Angle1 = atan2f(bullet2.position.y - bullet.position.y, bullet2.position.x - bullet.position.x);
             
+            float rad_Angle2 = acosf((temp.dotProduct(prevPos, currPos)) / (bullet.position - bullet2.position).magnitudeSquared());
+
             float deg = rad_Angle1 * (180 / PI);
 
             shurikenSprite.setRotation(-deg + 90);
+            //shurikenSprite.rotate(-deg);
 
             if (bullet.getIsDestroyed() != true)
             {
@@ -276,19 +289,42 @@ int main()
 
             window.display();
 
-            cout << bullet.velocity.x << ", " << bullet.velocity.y << endl;
+     
 
-
-            
-            /*
-            if (bullet.position.x > bullet.initialPos.x && bullet.position.y >= bullet.initialPos.y)
+            if (bullet2.velocity.magnitude() <= 10.0f)
             {
+                lastDegMeasure = -deg + 90;
                 break;
             }
-            */
+            
            
         }
     }
+    
+
+    if (lastDegMeasure >= 0.0f && lastDegMeasure <= 270.0f)
+    {
+        //lastdegmeasure / 360
+        float angle;
+        angle = lastDegMeasure / 360;
+        //add the result to the revcount
+        revCount = revCount + angle;
+    }
+    else if (lastDegMeasure < 0)
+    {
+        //finalangle = 360 + lastdegmeasure
+        float angle;
+        angle = 360 + lastDegMeasure;
+        //finalangle / 360
+        angle = angle / 360;
+        //add the result to the revcount
+        revCount = revCount + angle;
+    }
+
+    
+    float fullRev = floorf((bullet2.totalDistanceTravelled.magnitude()) / circumference);
+    cout << setprecision(3) << "Spinner has completed: " << revCount + fullRev << " revolutions" << endl;
+    cout << setprecision(4) <<"Spinner took " << bullet2.timer.getElapsedTime().asSeconds() << " secs to reach minimum speed" << endl;
 
     //utils.displayDistanceTravelled(bullet);
 
